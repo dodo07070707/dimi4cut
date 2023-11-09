@@ -13,6 +13,6 @@ def view(request):
 
 
 def detail(request, user_id):
-    data = Data.objects.get(id=user_id)
+    data = Data.objects.get(user_id=user_id)
     context = {'data': data}
     return render(request, 'detail.html', context)
