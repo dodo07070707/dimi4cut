@@ -9,7 +9,7 @@ image4 = cv2.imread('images/example4.jpg')
 image_frame = cv2.imread('images/blackframe.png')
 
 # 이미지 크기를 맞춰줌
-image1_resized = cv2.resize(image1, (312, 234))
+image1_resized = cv2.resize(image1, (312, 234)) # 여기 좌표 바꿔야 함
 image2_resized = cv2.resize(image2, (312, 234))
 image3_resized = cv2.resize(image3, (312, 234))
 image4_resized = cv2.resize(image4, (312, 234))
