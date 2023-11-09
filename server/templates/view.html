@@ -1,0 +1,9 @@
+{% if data_list %}   
+    <ul>
+    {% for data in data_list %}
+        <li><a href="/app/{{ data.id }}/">{{ data.user_id }} {{ data.pw }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>no data</p>
+{% endif %}
