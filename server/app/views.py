@@ -1,5 +1,7 @@
 from django.shortcuts import render
+from rest_framework import viewsets
 from .models import Data
+from .serializer import DataSerializer
 from django.conf import settings
 import os
 
@@ -16,3 +18,8 @@ def detail(request, user_id):
     data = Data.objects.get(user_id=user_id)
     context = {'data': data}
     return render(request, 'detail.html', context)
+
+
+class DataViewSet(viewsets.ModelViewSet):
+    queryset = Data.objects.all()
+    serializer_class = DataSerializer
