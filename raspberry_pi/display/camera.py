@@ -9,6 +9,18 @@ button_pin = 17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+PIN = 10000
+
+while True:
+    try:
+        PIN = int(input("네 자리 정수의 핀 번호를 입력하세요: "))
+        if 0 <= PIN <= 9999:
+            break
+        else:
+            print("올바른 범위의 핀 번호를 입력하세요.")
+    except ValueError:
+        print("정수를 입력해주세요.")
+
 # 카메라 모듈 초기화
 for i in range(1, 5):
     cap = cv2.VideoCapture(0)
@@ -20,7 +32,7 @@ for i in range(1, 5):
     # 버튼을 누르면 사진을 찍도록 하는 변수
     take_photo = False
     start_time = time.time()
-
+    
     while True:
         # 프레임 읽기
         ret, frame = cap.read()
@@ -51,6 +63,5 @@ for i in range(1, 5):
     # 작업 완료 후 리소스 해제
     cap.release()
     cv2.destroyAllWindows()
-
 
 #! sudo modprobe bcm2835-v4l2으로 카메라 모듈 활성화
