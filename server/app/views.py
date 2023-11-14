@@ -1,8 +1,7 @@
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
-from rest_framework import viewsets
 from .models import Data
-from .serializer import DataSerializer
-from django.conf import settings
 import os
 
 # Create your views here.
@@ -20,6 +19,28 @@ def detail(request, user_id):
     return render(request, 'detail.html', context)
 
 
-class DataViewSet(viewsets.ModelViewSet):
-    queryset = Data.objects.all()
-    serializer_class = DataSerializer
+@csrf_exempt
+def register(request):
+    print(request.method)
+    if request.method == 'POST':
+        try:
+            received_data = request.POST.dict()
+
+            user_id = received_data.get('user_id')
+            pw = received_data.get('pw')
+            image = request.FILES.get('image')
+
+            data = Data(user_id=user_id, pw=pw, image=image)
+            data.save()
+
+            response_data = {'status': 'success', 'message': 'data saved'}
+            return JsonResponse(response_data, status=200)
+        except Exception as e:
+            response_data = {'status': 'error', 'message': str(e)}
+            return JsonResponse(response_data, status=400)
+    elif request.method == 'GET':
+        response_data = {'status': 'success', 'message': ''}
+        return JsonResponse(response_data, status=200)
+    else:
+        response_data = {'status': 'error', 'message': 'wrong request method'}
+        return JsonResponse(response_data, status=405)

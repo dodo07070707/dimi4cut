@@ -1,20 +1,21 @@
 import cv2
-from numpy import ndarray
+import numpy as np
+from path import IMG_DIR, PATH
 
 
 def merge(
     user_id: int,
-    img1: ndarray,
-    img2: ndarray,
-    img3: ndarray,
-    img4: ndarray,
-) -> ndarray:
+    img1: np.ndarray,
+    img2: np.ndarray,
+    img3: np.ndarray,
+    img4: np.ndarray,
+) -> None:
 
     # img1 = cv2.imread('images/example1.jpg')
     # img2 = cv2.imread('images/example2.jpg')
     # img3 = cv2.imread('images/example3.jpg')
     # img4 = cv2.imread('images/example4.jpg')
-    img_frame = cv2.imread('images/blackframe_big.png')
+    img_frame = cv2.imread(f"{PATH}/raspberry_pi/images/blackframe_big.png")
 
     # 이미지 크기를 맞춰줌
     img1_resized = cv2.resize(img1, (704*4, 528*4))
@@ -39,4 +40,4 @@ def merge(
     img_frame[y_offset4:y_offset4 + img4_resized.shape[0],
               x_offset4:x_offset4 + img4_resized.shape[1]] = img4_resized
 
-    return img_frame
+    cv2.imwrite(f"{IMG_DIR}/{user_id}.jpg", img_frame)
