@@ -270,15 +270,13 @@ class Window(Tk):
                 self.upload_completed = True
                 self.update()
                 image_upload(self.i, self.pw, self.images)
+                self.pw = 'abcd'
 
             timer = int(time.time() - self.start_time)
 
             if timer >= 5:
                 self.change_screen(0)
                 return
-
-            id_row.info_num.configure(text=f"{self.i}")
-            pw_row.info_num.configure(text=f"{self.pw}")
 
             self.after(self.delay, stream)
 
