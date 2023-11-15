@@ -1,7 +1,7 @@
 {% if data_list %}   
     <ul>
     {% for data in data_list %}
-        <li><a href="/app/{{ data.user_id }}/">{{ data.user_id }}</a></li>
+        <li><a href="/{{ data.user_id }}/">{{ data.user_id }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

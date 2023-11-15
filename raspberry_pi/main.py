@@ -147,7 +147,7 @@ class Window(Tk):
 
     def render_first(self) -> None:
         def input_pw(event) -> None:
-            if textfield.get():
+            if len(textfield.get()) == 4:
                 self.pw = textfield.get()
                 self.start_time = time.time()
                 self.change_screen(1)
