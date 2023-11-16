@@ -4,9 +4,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.view),
+    path('', views.index),
+    path('get_data/', views.get_input, name='get_data'),
+    path('detail/', views.detail, name='detail'),
     path('register/', views.register),
-    path('<int:user_id>/', views.detail),
 ]
 
 if settings.DEBUG:
