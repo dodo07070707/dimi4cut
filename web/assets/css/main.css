@@ -3085,12 +3085,12 @@ input, select, textarea {
 		}
 
 	#picture_main {
-			padding: 0em 0 10rem 0 ;
+			padding: 0em 0 5rem 0 ;
 		}
 			@media screen and (max-width: 2560px) {
 	
 				#picture_main {
-					padding: 0em 0 1rem 0 ;
+					padding: 0em 0 0rem 0 ;
 				}
 	
 			}
@@ -3106,7 +3106,7 @@ input, select, textarea {
 			@media screen and (min-width : 0px) and (max-width: 600px) {
 	
 				#picture_main {
-					padding: 0em 0 10rem 0 ;
+					padding: 0em 0 5rem 0 ;
 				}
 	
 			}
@@ -3155,7 +3155,9 @@ input, select, textarea {
 	align-items: center;
 	width : calc(2.1em * 5);
 	height: calc(0.6em * 5);
+	margin-top: 3rem;
 }
+
 
 /* Footer */
 
