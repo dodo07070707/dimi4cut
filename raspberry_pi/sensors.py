@@ -19,6 +19,9 @@ GPIO.setup(segment_pins, GPIO.OUT)
 GPIO.setup(led_pin, GPIO.OUT)
 GPIO.setup(potentiometer_pin, GPIO.IN)
 
+pwm = GPIO.PWM(buzzer_pin, GPIO.OUT)
+pwm.start(50)
+
 # 7-Segment Display 디지트 맵
 digit_map = {
     0: (1, 1, 1, 1, 1, 1, 0),
@@ -42,10 +45,15 @@ def display_digit(digit):
         GPIO.output(pin, digit_map[digit][i])
 
 def buzzer_on():
-    GPIO.output(buzzer_pin, GPIO.HIGH)
+    pwm.ChangeFrequency(523) #도
+    time.sleep(1)
+    pwm.ChangeFrequency(659) #미
+    time.sleep(1)
+    pwm.ChangeFrequency(783) #솔
+    time.sleep(1)
 
 def buzzer_off():
-    GPIO.output(buzzer_pin, GPIO.LOW)
+    pwm.ChangeFrequency(0)
 
 def take_photo():
     timestamp = time.strftime("%Y%m%d%H%M%S")
