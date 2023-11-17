@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-from picamera import PiCamera
+from libcamera import Camera
 import cv2
 import numpy as np
 
@@ -12,6 +12,7 @@ led_pin = 26  # LED 핀
 potentiometer_pin = 19  # 가변 저항 핀
 
 # GPIO 초기화
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(buzzer_pin, GPIO.OUT)
@@ -19,7 +20,7 @@ GPIO.setup(segment_pins, GPIO.OUT)
 GPIO.setup(led_pin, GPIO.OUT)
 GPIO.setup(potentiometer_pin, GPIO.IN)
 
-buzzerpwm = GPIO.PWM(buzzer_pin, GPIO.OUT)
+buzzerpwm = GPIO.PWM(buzzer_pin, 1000)
 buzzerpwm.start(50)
 
 # 7-Segment Display 디지트 맵
@@ -36,8 +37,11 @@ digit_map = {
     9: (1, 1, 1, 1, 0, 1, 1),
 }
 
+cv2.namedWindow("Life4Cut",cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Life4Cut",1280,960)
+
 # 카메라 초기화
-camera = PiCamera()
+camera = Camera()
 camera.start_preview()  # OpenCV로 실시간 화면 보기
 
 #LED 초기화
@@ -62,8 +66,9 @@ def buzzer_off():
 def take_photo():
     timestamp = time.strftime("%Y%m%d%H%M%S")
     filename = f"photo_{timestamp}.jpg"
-    camera.capture(filename)
-    print(f"사진 촬영: {filename}")
+    frame = camera.capture()
+    cv2.imwrite(filename,frame)
+    print(f"took photo: {filename}")
 
 def main():
     order_number = 0;
@@ -91,7 +96,6 @@ def main():
                     buzzer_on()
                     take_photo()
                     buzzer_off()
-                    start_time = time.time()
 
         except KeyboardInterrupt:
             pass
@@ -101,5 +105,5 @@ def main():
             GPIO.cleanup()
             camera.close()
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
