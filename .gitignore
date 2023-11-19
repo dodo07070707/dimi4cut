@@ -1,5 +1,5 @@
-/../__pycashe__/
-/../.vscode/
+**/__pycashe__/
+**/.vscode/
 db.sqlite3
 server/media/media/
 raspberry_pi/data/
