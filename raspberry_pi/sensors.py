@@ -1,4 +1,4 @@
-import RPi.GPIO as GPIO
+import RPi.GPIO as g
 import time
 import cv2
 import numpy as np
@@ -11,15 +11,15 @@ led_pin = 26  # LED 핀
 potentiometer_pin = 19  # 가변 저항 핀
 
 # GPIO 초기화
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(buzzer_pin, GPIO.OUT)
-GPIO.setup(segment_pins, GPIO.OUT)
-GPIO.setup(led_pin, GPIO.OUT)
-GPIO.setup(potentiometer_pin, GPIO.IN)
+g.setwarnings(False)
+g.setmode(g.BCM)
+g.setup(button_pin, g.IN, pull_up_down=g.PUD_UP)
+g.setup(buzzer_pin, g.OUT)
+g.setup(segment_pins, g.OUT)
+g.setup(led_pin, g.OUT)
+g.setup(potentiometer_pin, g.IN)
 
-buzzerpwm = GPIO.PWM(buzzer_pin, 1000)
+buzzerpwm = g.PWM(buzzer_pin, 1000)
 buzzerpwm.start(50)
 
 # 7-Segment Display 디지트 맵
@@ -43,12 +43,12 @@ cv2.resizeWindow("Life4Cut", 1280, 960)
 cap = cv2.VideoCapture(0)  # OpenCV 카메라 객체 생성
 
 # LED 초기화
-ledpwm = GPIO.PWM(led_pin, 100)  # PWM 주파수 설정
+ledpwm = g.PWM(led_pin, 100)  # PWM 주파수 설정
 ledpwm.start(0)  # PWM 시작, 초기 밝기 0으로 설정
 
 def display_digit(digit):
     for i, pin in enumerate(segment_pins):
-        GPIO.output(pin, digit_map[digit][i])
+        g.output(pin, digit_map[digit][i])
 
 def buzzer_on():
     buzzerpwm.ChangeFrequency(523)  # 도
@@ -84,7 +84,7 @@ def main():
                 remaining_time = max(0, 120 - int(elapsed_time))
                 
                 # 가변 저항 값 계산 + LED 조절
-                pot_value = GPIO.input(potentiometer_pin)
+                pot_value = g.input(potentiometer_pin)
                 brightness = int(pot_value / 1023 * 100)  # 정규화
                 ledpwm.ChangeDutyCycle(brightness)
                 
@@ -94,7 +94,7 @@ def main():
                     time.sleep(0.1)
             
                 # 120초가 지나거나 버튼이 눌리면 사진 찍기
-                if elapsed_time >= 120 or not GPIO.input(button_pin):
+                if elapsed_time >= 120 or not g.input(button_pin):
                     buzzer_on()
                     take_photo()
                     buzzer_off()
@@ -105,7 +105,7 @@ def main():
         finally:
             cap.release()  # 카메라 객체 해제
             cv2.destroyAllWindows()  # OpenCV 창 닫기
-            GPIO.cleanup()
+            g.cleanup()
 
 if __name__ == "__main__":
     main()
