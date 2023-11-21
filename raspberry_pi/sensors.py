@@ -24,16 +24,16 @@ buzzerpwm.start(50)
 
 # 7-Segment Display 디지트 맵
 digit_map = {
-    0: (1, 1, 1, 1, 1, 1, 0, 0),
-    1: (0, 1, 1, 0, 0, 0, 0, 0),
-    2: (1, 1, 0, 1, 1, 0, 1, 0),
-    3: (1, 1, 1, 1, 0, 0, 1, 0),
-    4: (0, 1, 1, 0, 0, 1, 1, 0),
-    5: (1, 0, 1, 1, 0, 1, 1, 0),
-    6: (1, 0, 1, 1, 1, 1, 1, 0),
-    7: (1, 1, 1, 0, 0, 1, 0, 0),
-    8: (1, 1, 1, 1, 1, 1, 1, 0),
-    9: (1, 1, 1, 1, 0, 1, 1, 0),
+    '0' : (1, 1, 1, 1, 1, 1, 0, 0),
+    '1' : (0, 1, 1, 0, 0, 0, 0, 0),
+    '2' : (1, 1, 0, 1, 1, 0, 1, 0),
+    '3' : (1, 1, 1, 1, 0, 0, 1, 0),
+    '4' : (0, 1, 1, 0, 0, 1, 1, 0),
+    '5' : (1, 0, 1, 1, 0, 1, 1, 0),
+    '6' : (1, 0, 1, 1, 1, 1, 1, 0),
+    '7' : (1, 1, 1, 0, 0, 1, 0, 0),
+    '8' : (1, 1, 1, 1, 1, 1, 1, 0),
+    '9' : (1, 1, 1, 1, 0, 1, 1, 0),
 }
 
 cv2.namedWindow("Life4Cut", cv2.WINDOW_NORMAL)
@@ -46,9 +46,17 @@ cap = cv2.VideoCapture(0)  # OpenCV 카메라 객체 생성
 ledpwm = g.PWM(led_pin, 100)  # PWM 주파수 설정
 ledpwm.start(0)  # PWM 시작, 초기 밝기 0으로 설정
 
+segments = (2,3,4,5,6,7,8,9)
+
+for segment in segments:
+    g.setup(segment, g.OUT)
+    g.output(segment, False)
+    
+
 def display_digit(digit):
-    for i, pin in enumerate(segment_pins):
-        g.output(pin, digit_map[digit][i])
+    s = str(digit)
+    for loop in range(0,8):
+        g.output(segments[loop], digit_map[s][loop])
 
 def buzzer_on():
     buzzerpwm.ChangeFrequency(523)  # 도
