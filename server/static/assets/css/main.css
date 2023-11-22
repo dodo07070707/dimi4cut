@@ -205,6 +205,13 @@ input, select, textarea {
 		margin: 0 0 0.1em 0;
 	}
 
+	@media screen and (max-width:400px) {
+		h1{
+			font-size: 1.4em;
+		}
+		
+	}
+
 	h2, h3, h4, h5, h6 {
 		font-weight: 900;
 		line-height: 1.5;
@@ -1872,6 +1879,7 @@ input, select, textarea {
 			}
 
 	.number_input{
+		display: flex;
 		text-align: center;
 		overflow : hidden;
 		padding-bottom: 5em;
@@ -3110,12 +3118,15 @@ input, select, textarea {
 				}
 	
 			}
-
 .imgtype1{
 	align-items: center;
 	width: calc(7.76em * var(--multiple_style1));
 	height: clac(25.6em * var(--multiple_style1));
 	box-shadow: 0 0 7em -3em rgba(255, 255, 255, 0.85);
+}
+
+.centermaker{
+	align-items: center;
 }
 
 .centermachine{
