@@ -6,11 +6,6 @@
 		<meta charset="utf-8" />
 		<meta name="google" content="notranslate">
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<meta property="og:url" content="#여기에 추가">
-		<meta property="og:title" content="DIMI4CUT">
-		<meta property="og:type" content="website">
-		<meta property="og:image" content="../static/images/thumbnail.png">
-		<meta property="og:description" content="디미고 인생네컷">
 		<link rel="stylesheet" href={% static 'assets/css/main.css' %} />
 		<noscript><link rel="stylesheet" href={% static 'assets/css/noscript.css' %} /></noscript>
         <script src="https://kit.fontawesome.com/90e90798c9.js" crossorigin="anonymous"></script>
@@ -40,16 +35,14 @@
 							{% csrf_token %}
 							<header>
 								<h1>촬영 시 표시된</h1>
-				                <h1>다운로드 번호를</h1>
-								<h1>알려주세요</h1>
+				                <h1>다운로드 번호를 알려주세요</h1>
 							</header>
                             <div class="number_input">
                                 <input type="number" id="fourDigitNumber" name="user_id" pattern="\d{4}" required>
                             </div>
                             <header>
 								<h1>설정한</h1>
-				                <h1>비밀번호를</h1> 
-								<h1>알려주세요</h1>
+				                <h1>비밀번호를 알려주세요</h1>
 							</header>
                             <div class="number_input">
                                 <input type="number" id="fourDigitNumber" name="password" pattern="\d{4}" required>

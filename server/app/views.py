@@ -1,9 +1,7 @@
 from django.http import JsonResponse, HttpRequest
-from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from .models import Data
-import os
 
 # Create your views here.
 
@@ -12,6 +10,7 @@ def index(request: HttpRequest):
     return render(request, 'index.html')
 
 
+# PRG 방식으로 데이터 조회
 def get_input(request: HttpRequest):
     if request.method == 'POST':
         input_id = request.POST.get('user_id')
@@ -34,6 +33,7 @@ def detail(request: HttpRequest):
     return render(request, 'image_show.html', context)
 
 
+# 라즈베리파이에서 데이터를 보낼 페이지
 @csrf_exempt
 def register(request: HttpRequest):
     print(request.method)
