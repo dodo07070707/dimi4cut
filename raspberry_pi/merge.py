@@ -4,17 +4,13 @@ from path import IMG_DIR, PATH
 
 
 def merge(
-    user_id: int,
     img1: np.ndarray,
     img2: np.ndarray,
     img3: np.ndarray,
     img4: np.ndarray,
 ) -> None:
 
-    # img1 = cv2.imread('images/example1.jpg')
-    # img2 = cv2.imread('images/example2.jpg')
-    # img3 = cv2.imread('images/example3.jpg')
-    # img4 = cv2.imread('images/example4.jpg')
+    # img_frame 불러오기
     img_frame = cv2.imread(f"{PATH}/images/blackframe_big.png")
 
     # 이미지 크기를 맞춰줌
@@ -40,4 +36,5 @@ def merge(
     img_frame[y_offset4:y_offset4 + img4_resized.shape[0],
               x_offset4:x_offset4 + img4_resized.shape[1]] = img4_resized
 
-    cv2.imwrite(f"{IMG_DIR}/{user_id}.jpg", img_frame)
+    # 이미지 저장
+    cv2.imwrite(f"{IMG_DIR}/img.jpg", img_frame)
