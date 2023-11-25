@@ -107,7 +107,7 @@ def check_person():
 def map(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-def setColor(col):   # 예)  col = 0x112233
+def setColor(col):
     R_val = (col & 0x110000) >> 16
     G_val = (col & 0x001100) >> 8
     B_val = (col & 0x000011) >> 0
