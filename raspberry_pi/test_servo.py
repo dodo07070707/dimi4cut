@@ -12,14 +12,14 @@ servo = g.PWM(servoPin, 50)
 servo.start(duty[idx])
 time.sleep(1)
 
-while True:
-    idx = (idx+1)%4
-    servo.ChangeDutyCycle(duty[idx])
-    time.sleep(10)  
-servo.ChangeDutyCycle(duty[0])
-time.sleep(1)
-    
-servo.stop()
-g.cleanup()
+try:
+    while True:
+        idx = (idx+1)%4
+        servo.ChangeDutyCycle(duty[idx])
+        time.sleep(10)
 
+except KeyboardInterrupt:
+    servo.ChangeDutyCycle(duty[0])    
+    servo.stop()
+    g.cleanup()
 
