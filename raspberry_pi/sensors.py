@@ -9,6 +9,9 @@ buzzer_pin = 18  # 부저 핀
 segment_pins = [21, 20, 16, 12, 25, 24, 23, 22]  # 7-Segment 핀
 led_pin = 26  # LED 핀
 potentiometer_pin = 19  # 가변 저항 핀
+wave_pin = 16 #초음파 센서 핀
+pins = {'pin_R':11, 'pin_G':9, 'pin_B':10} #RGB LED 핀
+
 
 # GPIO 초기화
 g.setwarnings(False)
@@ -18,6 +21,7 @@ g.setup(buzzer_pin, g.OUT)
 g.setup(segment_pins, g.OUT)
 g.setup(led_pin, g.OUT)
 g.setup(potentiometer_pin, g.IN)
+g.setup(wave_pin, g.IN)
 
 buzzerpwm = g.PWM(buzzer_pin, 1000)
 buzzerpwm.start(50)
@@ -35,6 +39,18 @@ digit_map = {
     '8' : (1, 1, 1, 1, 1, 1, 1, 0),
     '9' : (1, 1, 1, 1, 0, 1, 1, 0),
 }
+
+colors = [0xFF0000, 0x0000FF]
+
+for i in pins:
+    g.setup(pins[i], g.OUT)
+    g.output(pins[i], g.HIGH)
+p_R = g.PWM(pins['pin_R'], 2000)
+p_G = g.PWM(pins['pin_G'], 2000)
+p_B = g.PWM(pins['pin_B'], 2000)
+p_R.start(0)
+p_G.start(0)
+p_B.start(0)
 
 cv2.namedWindow("Life4Cut", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("Life4Cut", 1280, 960)
@@ -79,6 +95,27 @@ def take_photo():
     # 이미지 저장
     cv2.imwrite(filename, frame)
     print(f"took photo: {filename}")
+    
+#RGB LED 코드
+def check_person():
+    if g.input(wave_pin) == True:
+        setColor(colors[0])
+    else:
+        setColor(colors[1])
+    
+def map(x, in_min, in_max, out_min, out_max):
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+def setColor(col):   # 예)  col = 0x112233
+    R_val = (col & 0x110000) >> 16
+    G_val = (col & 0x001100) >> 8
+    B_val = (col & 0x000011) >> 0
+    R_val = map(R_val, 0, 255, 0, 100)
+    G_val = map(G_val, 0, 255, 0, 100)
+    B_val = map(B_val, 0, 255, 0, 100)
+    p_R.ChangeDutyCycle(100-R_val)
+    p_G.ChangeDutyCycle(100-G_val)
+    p_B.ChangeDutyCycle(100-B_val)
 
 def main():
     order_number = 0
