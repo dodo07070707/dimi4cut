@@ -5,7 +5,8 @@
 **Used Stack**  
  - Raspberrypi3
  - OpenCV
- - Django  
+ - Django
+ - tkinter
   
 **Todo**
  - 라즈베리파이 사진찍기 + django에 올리기
