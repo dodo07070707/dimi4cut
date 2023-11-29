@@ -9,6 +9,4 @@
  - tkinter (GUI)
   
 **Todo**
- - 라즈베리파이 코드와 tkinter 결합
- - buzzer 코드 구현
  - 색감 보정 (선택)

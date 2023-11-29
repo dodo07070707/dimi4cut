@@ -1,65 +1,127 @@
 import cv2
 import time
 from tkinter import *
-from PIL import Image
-from PIL import ImageTk
+from PIL import Image, ImageTk
 from send import post
 from merge import merge
 import RPi.GPIO as g
-import time
 import spidev
-import numpy as np
-
-spi = spidev.SpiDev()
-spi.open(0,0)
-spi.max_speed_hz = 1000000
-# GPIO 설정
-button_pin = 17  # 버튼 핀
-buzzer_pin = 18  # 부저 핀
-segment_pins = (21, 20, 16, 12, 25, 24, 22, 23)  # 7-Segment 핀
-led_pin = 26  # LED 핀
-triger = 2 #초음파 센서 핀
-echo = 3
-pins = {'pin_R':11, 'pin_G':9, 'pin_B':10} #RGB LED 핀
 
 
-# GPIO 초기화
-g.setwarnings(False)
-g.setmode(g.BCM)
-g.setup(button_pin, g.IN, pull_up_down=g.PUD_UP)
-g.setup(buzzer_pin, g.OUT)
-g.setup(segment_pins, g.OUT)
-g.setup(led_pin, g.OUT)
-g.setup(echo, g.IN)
-g.setup(triger, g.OUT)
+# ! 라즈베리파이 회로와 관련된 주석은 한글로, 서버나 GUI 및 이미지 처리와 관련된 주석은 영어로 쓰여 있습니다.
 
-buzzerpwm = g.PWM(buzzer_pin, 1000)
-# 7-Segment Display 디지트 맵
-digit_map = {
-    '0' : (1, 1, 1, 1, 1, 1, 0, 0),
-    '1' : (0, 1, 1, 0, 0, 0, 0, 0),
-    '2' : (1, 1, 0, 1, 1, 0, 1, 0),
-    '3' : (1, 1, 1, 1, 0, 0, 1, 0),
-    '4' : (0, 1, 1, 0, 0, 1, 1, 0),
-    '5' : (1, 0, 1, 1, 0, 1, 1, 0),
-    '6' : (1, 0, 1, 1, 1, 1, 1, 0),
-    '7' : (1, 1, 1, 0, 0, 1, 0, 0),
-    '8' : (1, 1, 1, 1, 1, 1, 1, 0),
-    '9' : (1, 1, 1, 1, 0, 1, 1, 0),
-    '.' : (0, 0, 0, 0, 0, 0, 0, 0),
-}
+class raspberry:
 
-colors = [0xFF0000, 0x0000FF]
+    # 7-Segment Display 디지트 맵
+    digit_map = {
+        '0': (1, 1, 1, 1, 1, 1, 0),
+        '1': (0, 1, 1, 0, 0, 0, 0),
+        '2': (1, 1, 0, 1, 1, 0, 1),
+        '3': (1, 1, 1, 1, 0, 0, 1),
+        '4': (0, 1, 1, 0, 0, 1, 1),
+        '5': (1, 0, 1, 1, 0, 1, 1),
+        '6': (1, 0, 1, 1, 1, 1, 1),
+        '7': (1, 1, 1, 0, 0, 1, 0),
+        '8': (1, 1, 1, 1, 1, 1, 1),
+        '9': (1, 1, 1, 1, 0, 1, 1),
+        '.': (0, 0, 0, 0, 0, 0, 0),
+    }
 
-for i in pins:
-    g.setup(pins[i], g.OUT)
-    g.output(pins[i], g.HIGH)
-p_R = g.PWM(pins['pin_R'], 2000)
-p_G = g.PWM(pins['pin_G'], 2000)
-p_B = g.PWM(pins['pin_B'], 2000)
-p_R.start(0)
-p_G.start(0)
-p_B.start(0)
+    # GPIO 설정
+    button_pin = 17  # 버튼 핀
+    buzzer_pin = 18  # 부저 핀
+    segment_pins = (21, 20, 16, 12, 25, 24, 22)  # 7-Segment 핀
+    pins = {'pin_R': 26, 'pin_G': 19, 'pin_B': 13}  # RGB LED 핀
+
+    # rgb 값
+    colors = {'red': 0xFF0000, 'green': 0x00FF00, 'blue': 0x0000FF}
+
+    # mcp3008 활성화
+    spi = spidev.SpiDev()
+    spi.open(0, 0)
+    spi.max_speed_hz = 1000000
+
+    def __init__(self):
+        # GPIO 초기화
+        g.setwarnings(False)
+        g.setmode(g.BCM)
+        g.setup(self.button_pin, g.IN, pull_up_down=g.PUD_UP)
+        g.setup(self.buzzer_pin, g.OUT)
+
+        # buzzer 활성화
+        self.buzzerpwm = g.PWM(self.buzzer_pin, 1000)
+        self.buzzerpwm.start(0)
+
+        # RGB LED 활성화
+        for i in self.pins:
+            g.setup(self.pins[i], g.OUT)
+            g.output(self.pins[i], g.HIGH)
+        self.p_R = g.PWM(self.pins['pin_R'], 2000)
+        self.p_G = g.PWM(self.pins['pin_G'], 2000)
+        self.p_B = g.PWM(self.pins['pin_B'], 2000)
+        self.p_R.start(0)
+        self.p_G.start(0)
+        self.p_B.start(0)
+
+        # 7 segment 활성화
+        for segment in self.segment_pins:
+            g.setup(segment, g.OUT)
+            g.output(segment, False)
+
+    # spi 통신
+    def ReadVol(self, vol):
+        adc = self.spi.xfer2([1, (0x08+vol) << 4, 0])
+        data = ((adc[1] & 0x03) << 8) + adc[2]
+        return data
+
+    # 7 segment 출력
+    def display_digit(self, digit):
+        print(digit)
+        s = str(digit)
+        for loop in range(7):
+            g.output(self.segment_pins[loop], self.digit_map[s][loop])
+
+    # 7 segment 출력 제거
+    def display_digit_0(self):
+        s = '.'
+        for loop in range(7):
+            g.output(self.segment_pins[loop], self.digit_map[s][loop])
+
+    # buzzer 실행
+    def buzzer_on(self):
+        self.buzzerpwm.ChangeDutyCycle(30)
+        self.buzzerpwm.ChangeFrequency(329)  # 도
+
+    # buzzer 실행 중지
+    def buzzer_off(self):
+        self.buzzerpwm.ChangeDutyCycle(0)
+
+    # 가변저항 & RGB LED
+    def check_person(self):
+        # 가변 저항 값 받아오기
+        a = self.ReadVol(0)
+        # 값에 따라 RGB LED 색 변경
+        if a < 512:
+            self.setColor(self.colors['red'])
+        else:
+            self.setColor(self.colors['green'])
+
+    # RGB LED 색 변경
+
+    def setColor(self, col):
+        R_val = (col & 0xFF0000) >> 16
+        G_val = (col & 0x00FF00) >> 8
+        B_val = (col & 0x0000FF) >> 0
+        R_val *= 100 / 255
+        G_val *= 100 / 255
+        B_val *= 100 / 255
+        self.p_R.ChangeDutyCycle(100-R_val)
+        self.p_G.ChangeDutyCycle(100-G_val)
+        self.p_B.ChangeDutyCycle(100-B_val)
+
+
+#  라즈베리 초기 설정
+r = raspberry()
 
 # text 430:1080 = 43:108
 # frame 864:1080 = 4:5
@@ -168,23 +230,25 @@ class Window(Tk):
     cam = cv2.VideoCapture(0)
     fps = cam.get(cv2.CAP_PROP_FPS)
     delay = round(1000.0/fps)  # microsecond per frame
-    button_down = False
     button_up = False
 
     def __init__(self) -> None:
         super().__init__()
         self.attributes("-fullscreen", True)
-        self.bind('<F11>', lambda e: self.change_full())
         self.screens = [Frame(self), Frame(self), Frame(self)]
         self.change_screen(0)
 
-    def change_full(self):
-        self.full = not self.full
-        self.attributes("-fullscreen", self.full)
-
     # first page
-
     def render_first(self) -> None:
+
+        def stream() -> None:  # recursive function(main loop)
+
+            # 가변 저항 입력받기
+            r.check_person()
+
+            # recurse after delay
+            self.after(self.delay, stream)
+
         def input_pw(event) -> None:
             if len(textfield.get()) == 4:
                 self.pw = textfield.get()
@@ -214,7 +278,7 @@ class Window(Tk):
         )
         box2 = Frame(self.screens[0], height=px2h(124), bg='black')
 
-        # check password is valid
+        # check input is valid
         vcmd = (
             self.screens[0].register(
                 lambda x: (len(x) <= 4 and x.isdigit()) or x == ''
@@ -248,38 +312,45 @@ class Window(Tk):
         # set initial focus
         textfield.focus_set()
 
+        # start loop
+        stream()
+
+    # second page
     def render_second(self) -> None:
         self.images = []
 
         def stream() -> None:  # recursive function(main loop)
-            timer = int(20 + self.start_time - time.time())
+            timer = int(150 + self.start_time - time.time())
             count = len(self.images) + 1
 
+            if timer < 10:
+                # 7 segment 출력
+                r.display_digit(timer)
+
             if (timer == 0 or count == 5):
-                for loop in range(8):
-                    g.output(segment_pins[loop], digit_map['.'][loop])
-                #self.unbind("<space>")
                 self.change_screen(2)  # move to third page
+                # 7 segment 출력 제거
+                r.display_digit_0()
                 return
-            
-            if g.input(button_pin)==g.LOW:
-                self.button_down=True
-            
-            if self.button_down and g.input(button_pin)==g.HIGH:
+
+            # 가변 저항 입력받기
+            r.check_person()
+
+            if g.input(r.button_pin) == g.HIGH:
                 self.button_up = True
 
-            # when button-pressed
-            if self.button_down and self.button_up:
-                self.button_down = False
+            # 버튼이 눌렸을 경우
+            if g.input(r.button_pin) == g.LOW and self.button_up:
                 self.button_up = False
+
+                # buzzer 실행
+                r.buzzer_on()
+                # 2초 후 부저 실행 중지
+                self.after(2000, r.buzzer_off)
                 # save image
                 img = self.get_frame(save=True)
             else:
                 img = self.get_frame()
-                
-            if timer < 10:
-                for loop in range(8):
-                    g.output(segment_pins[loop], digit_map[str(timer)][loop])
 
             # update GUI
             timer_label.configure(text=f"{timer}초")
@@ -290,7 +361,6 @@ class Window(Tk):
             # recurse after delay
             self.after(self.delay, stream)
 
-        #self.bind("<space>", lambda e: self.get_frame(save=True))
         timer = int(150 + self.start_time - time.time())
         count = len(self.images) + 1
         img = self.get_frame()
@@ -325,17 +395,21 @@ class Window(Tk):
         # start loop
         stream()
 
-    def render_third(self) -> None:  # recursive function(main loop)
+    # third page
+    def render_third(self) -> None:
         self.upload_completed = False
 
-        def stream() -> None:
+        def stream() -> None:  # recursive function(main loop)
+
+            # 가변 저항 입력받기
+            r.check_person()
+
             if not self.upload_completed:
                 self.upload_completed = True
                 # draw on window
                 self.update()
                 # upload image
                 image_upload(self.i, self.pw, self.images)
-                self.pw = 'abcd'
 
             timer = int(time.time() - self.start_time)
 
@@ -410,6 +484,7 @@ class Window(Tk):
         # get frame
         ret, img = self.cam.read()
 
+        # save frame in list
         if save == True:
             self.images.append(img)
 
@@ -428,4 +503,3 @@ window.geometry(f"{1920*rate}x{1080*rate}")
 
 # start window
 window.mainloop()
-
