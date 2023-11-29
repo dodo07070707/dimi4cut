@@ -10,7 +10,7 @@ spi.max_speed_hz = 1000000
 # GPIO 설정
 button_pin = 17  # 버튼 핀
 buzzer_pin = 18  # 부저 핀
-segment_pins = (21, 20, 16, 12, 25, 24, 22, 23)  # 7-Segment 핀
+segment_pins = (21, 20, 16, 6, 25, 24, 22, 23)  # 7-Segment 핀
 led_pin = 26  # LED 핀
 triger = 2 #초음파 센서 핀
 echo = 3
@@ -27,7 +27,8 @@ g.setup(led_pin, g.OUT)
 g.setup(echo, g.IN)
 g.setup(triger, g.OUT)
 
-buzzerpwm = g.PWM(buzzer_pin, 1000)
+buzzerpwm = g.PWM(buzzer_pin, 100)
+buzzerpwm.start(0)
 # 7-Segment Display 디지트 맵
 digit_map = {
     '0' : (1, 1, 1, 1, 1, 1, 0, 0),
@@ -85,12 +86,10 @@ def display_digit_0():
         g.output(segment_pins[loop], digit_map[s][loop])
 
 def buzzer_on():
-    buzzerpwm.ChangeFrequency(523)  # 도
     time.sleep(1)
-    buzzerpwm.ChangeFrequency(659)  # 미
-    time.sleep(1)
-    buzzerpwm.ChangeFrequency(783)  # 솔
-    time.sleep(1)
+    buzzerpwm.ChangeDutyCycle(30)
+    buzzerpwm.ChangeFrequency(329)  # 도
+    time.sleep(2)
 
 def buzzer_off():
     buzzerpwm.ChangeDutyCycle(0)
@@ -131,10 +130,13 @@ def setColor(col):
     p_B.ChangeDutyCycle(100-B_val)
 
 def main():
+    buzzer_off()
     order_number = 0
     while True:
         
         order_number += 1
+        if order_number == 5:
+            break
         try:
             start_time = time.time()
             
@@ -152,12 +154,11 @@ def main():
                 print(elapsed_time, order_number)
                 
                 # 120초가 지나거나 버튼이 눌리면 사진 찍기
-                if elapsed_time >= 50 or not g.input(button_pin):
+                if elapsed_time >= 120 or not g.input(button_pin):
                     buzzer_on()
                     #take_photo()
                     buzzer_off()
                     display_digit_0()
-                    time.sleep(1)
                     break
                     
         except KeyboardInterrupt:
