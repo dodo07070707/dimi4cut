@@ -5,8 +5,61 @@ from PIL import Image
 from PIL import ImageTk
 from send import post
 from merge import merge
-# import RPi.GPIO as g
+import RPi.GPIO as g
+import time
+import spidev
+import numpy as np
 
+spi = spidev.SpiDev()
+spi.open(0,0)
+spi.max_speed_hz = 1000000
+# GPIO 설정
+button_pin = 17  # 버튼 핀
+buzzer_pin = 18  # 부저 핀
+segment_pins = (21, 20, 16, 12, 25, 24, 22, 23)  # 7-Segment 핀
+led_pin = 26  # LED 핀
+triger = 2 #초음파 센서 핀
+echo = 3
+pins = {'pin_R':11, 'pin_G':9, 'pin_B':10} #RGB LED 핀
+
+
+# GPIO 초기화
+g.setwarnings(False)
+g.setmode(g.BCM)
+g.setup(button_pin, g.IN, pull_up_down=g.PUD_UP)
+g.setup(buzzer_pin, g.OUT)
+g.setup(segment_pins, g.OUT)
+g.setup(led_pin, g.OUT)
+g.setup(echo, g.IN)
+g.setup(triger, g.OUT)
+
+buzzerpwm = g.PWM(buzzer_pin, 1000)
+# 7-Segment Display 디지트 맵
+digit_map = {
+    '0' : (1, 1, 1, 1, 1, 1, 0, 0),
+    '1' : (0, 1, 1, 0, 0, 0, 0, 0),
+    '2' : (1, 1, 0, 1, 1, 0, 1, 0),
+    '3' : (1, 1, 1, 1, 0, 0, 1, 0),
+    '4' : (0, 1, 1, 0, 0, 1, 1, 0),
+    '5' : (1, 0, 1, 1, 0, 1, 1, 0),
+    '6' : (1, 0, 1, 1, 1, 1, 1, 0),
+    '7' : (1, 1, 1, 0, 0, 1, 0, 0),
+    '8' : (1, 1, 1, 1, 1, 1, 1, 0),
+    '9' : (1, 1, 1, 1, 0, 1, 1, 0),
+    '.' : (0, 0, 0, 0, 0, 0, 0, 0),
+}
+
+colors = [0xFF0000, 0x0000FF]
+
+for i in pins:
+    g.setup(pins[i], g.OUT)
+    g.output(pins[i], g.HIGH)
+p_R = g.PWM(pins['pin_R'], 2000)
+p_G = g.PWM(pins['pin_G'], 2000)
+p_B = g.PWM(pins['pin_B'], 2000)
+p_R.start(0)
+p_G.start(0)
+p_B.start(0)
 
 # text 430:1080 = 43:108
 # frame 864:1080 = 4:5
@@ -122,7 +175,6 @@ class Window(Tk):
         super().__init__()
         self.attributes("-fullscreen", True)
         self.bind('<F11>', lambda e: self.change_full())
-        self.bind("<Escape>", lambda e: self.quit())
         self.screens = [Frame(self), Frame(self), Frame(self)]
         self.change_screen(0)
 
@@ -200,20 +252,34 @@ class Window(Tk):
         self.images = []
 
         def stream() -> None:  # recursive function(main loop)
-            timer = int(150 + self.start_time - time.time())
+            timer = int(20 + self.start_time - time.time())
             count = len(self.images) + 1
 
             if (timer == 0 or count == 5):
-                self.unbind("<space>")
+                for loop in range(8):
+                    g.output(segment_pins[loop], digit_map['.'][loop])
+                #self.unbind("<space>")
                 self.change_screen(2)  # move to third page
                 return
+            
+            if g.input(button_pin)==g.LOW:
+                self.button_down=True
+            
+            if self.button_down and g.input(button_pin)==g.HIGH:
+                self.button_up = True
 
             # when button-pressed
             if self.button_down and self.button_up:
+                self.button_down = False
+                self.button_up = False
                 # save image
                 img = self.get_frame(save=True)
             else:
                 img = self.get_frame()
+                
+            if timer < 10:
+                for loop in range(8):
+                    g.output(segment_pins[loop], digit_map[str(timer)][loop])
 
             # update GUI
             timer_label.configure(text=f"{timer}초")
@@ -224,7 +290,7 @@ class Window(Tk):
             # recurse after delay
             self.after(self.delay, stream)
 
-        self.bind("<space>", lambda e: self.get_frame(save=True))
+        #self.bind("<space>", lambda e: self.get_frame(save=True))
         timer = int(150 + self.start_time - time.time())
         count = len(self.images) + 1
         img = self.get_frame()
@@ -362,3 +428,4 @@ window.geometry(f"{1920*rate}x{1080*rate}")
 
 # start window
 window.mainloop()
+
