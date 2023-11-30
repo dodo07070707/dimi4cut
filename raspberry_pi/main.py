@@ -28,10 +28,10 @@ class raspberry:
     }
 
     # GPIO 설정
-    button_pin = 17  # 버튼 핀
+    button_pin = 2  # 버튼 핀
     buzzer_pin = 18  # 부저 핀
     segment_pins = (21, 20, 16, 12, 25, 24, 22)  # 7-Segment 핀
-    pins = {'pin_R': 26, 'pin_G': 19, 'pin_B': 13}  # RGB LED 핀
+    pins = {'pin_R': 26, 'pin_G': 13, 'pin_B': 19}  # RGB LED 핀
 
     # rgb 값
     colors = {'red': 0xFF0000, 'green': 0x00FF00, 'blue': 0x0000FF}
@@ -320,33 +320,39 @@ class Window(Tk):
         self.images = []
 
         def stream() -> None:  # recursive function(main loop)
-            timer = int(150 + self.start_time - time.time())
+            timer = int(20 + self.start_time - time.time())
             count = len(self.images) + 1
 
             if timer < 10:
                 # 7 segment 출력
                 r.display_digit(timer)
 
-            if (timer == 0 or count == 5):
+            if count == 5:
                 self.change_screen(2)  # move to third page
-                # 7 segment 출력 제거
-                r.display_digit_0()
+                
                 return
 
             # 가변 저항 입력받기
             r.check_person()
-
-            if g.input(r.button_pin) == g.HIGH:
+            
+            i = g.input(r.button_pin)
+            if i == g.HIGH:
                 self.button_up = True
+                img = self.get_frame()
 
             # 버튼이 눌렸을 경우
-            if g.input(r.button_pin) == g.LOW and self.button_up:
+            if (i == g.LOW and self.button_up) or timer == 0:
                 self.button_up = False
+                
+                self.start_time = time.time()
+                
+                # 7 segment 출력 제거
+                r.display_digit_0()
 
                 # buzzer 실행
                 r.buzzer_on()
                 # 2초 후 부저 실행 중지
-                self.after(2000, r.buzzer_off)
+                self.after(200, r.buzzer_off)
                 # save image
                 img = self.get_frame(save=True)
             else:
@@ -361,7 +367,7 @@ class Window(Tk):
             # recurse after delay
             self.after(self.delay, stream)
 
-        timer = int(150 + self.start_time - time.time())
+        timer = int(20 + self.start_time - time.time())
         count = len(self.images) + 1
         img = self.get_frame()
 
