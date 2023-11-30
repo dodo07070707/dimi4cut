@@ -3,10 +3,8 @@
 # Developer : 김도윤, 노현규
 
 **Used Stack**  
- - Raspberrypi3 (하드웨어)
+ - Raspberry pi 3B (하드웨어)
  - OpenCV (사진촬영 + 이미지 전처리 + 합성)
  - Django (웹 + 서버)
  - tkinter (GUI)
-  
-**Todo**
- - 색감 보정 (선택)
+ - Pillow (GUI)
